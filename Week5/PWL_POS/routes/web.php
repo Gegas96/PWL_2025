@@ -27,6 +27,9 @@ Route::get('/level', [LevelController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/kategori/create', [KategoriController::class, 'create']);
 Route::post('/kategori', [KategoriController::class, 'store']);
+Route::get ('/kategori/edit/{id}', [KategoriController :: class, 'edit' ]);
+Route::put('/kategori/update/{id}', [KategoriController :: class, 'update' ]);
+Route::get('/kategori/destroy/{id}', [KategoriController :: class, 'destroy' ]);
 
 
 // user
