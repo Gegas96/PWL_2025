@@ -27,7 +27,7 @@
                 <div class="form-group">
                     <label>Nama</label>
                     <input value="" type="text" name="name" id="name" class="form-control" required>
-                    <small id="error-nama" class="error-text form-text text-danger"></small>
+                    <small id="error-name" class="error-text form-text text-danger"></small>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
