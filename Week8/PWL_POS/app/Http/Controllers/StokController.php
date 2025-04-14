@@ -7,6 +7,7 @@ use App\Models\StokModel;
 use App\Models\BarangModel;
 use App\Models\UserModel;
 use Yajra\DataTables\Facades\DataTables;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -398,5 +399,21 @@ class StokController extends Controller
         
         $writer->save('php://output');
         exit;    
+    }
+
+    public function export_pdf()
+    {
+        $stok = StokModel::select('barang_id', 'user_id', 'stok_tanggal', 'stok_jumlah')
+                         ->orderBy('user_id')
+                         ->with('barang', 'user')
+                         ->get();
+
+        // use Barryvdh\DomPDF\Facade\Pdf;
+        $pdf = Pdf::loadView('stok.export_pdf', ['stok' => $stok]);
+        $pdf->setPaper('a4', 'portrait'); 
+        $pdf->setOption("isRemoteEnabled", true); 
+        $pdf->render();
+
+        return $pdf->stream('Data Stok '.date('Y-m-d H:i:s').'.pdf');
     }
 }
