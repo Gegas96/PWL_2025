@@ -6,6 +6,7 @@ use App\Models\LevelModel;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Validator;
@@ -35,7 +36,7 @@ class UserController extends Controller
     // Ambil data user dalam bentuk json untuk datatables 
     public function list(Request $request)
     {
-        $users = UserModel::select('user_id', 'username', 'name', 'level_id')->with('level');
+        $users = UserModel::select('user_id', 'username', 'name', 'level_id', 'photo')->with('level');
 
         // Filter data user berdasarkan level_id
         if ($request->level_id) {
@@ -208,34 +209,53 @@ class UserController extends Controller
 
     public function store_ajax(Request $request)
     {
-        // cek apakah request berupa ajax
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'level_id'  => 'required|integer',
-                'username'  => 'required|string|min:3|unique:m_user,username',
-                'name'      => 'required|string|max:100',
-                'password'  => 'required|min:6'
+                'level_id' => 'required|integer',
+                'username' => 'required|string|min:3|unique:m_user,username',
+                'name' => 'required|string|max:100',
+                'password' => 'required|min:5',
+                'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // max 2MB
             ];
 
-            // use Illuminate\Support\Facades\Validator;
             $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
                 return response()->json([
-                    'status' => false, // response status, false: error/gagal, true: berhasil
+                    'status' => false,
                     'message' => 'Validasi Gagal',
-                    'msgField' => $validator->errors(), // pesan error validasi
+                    'msgField' => $validator->errors(),
                 ]);
             }
 
-            UserModel::create($request->all());
+            // Simpan file foto jika ada
+            $photoName = null;
+
+            if ($request->hasFile('photo')) {
+
+                $file = $request->file('photo');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/uploads/photo', $filename);
+                unset($request['photo']);
+                $photoName = $filename;
+            }
+
+            // Simpan data user
+            UserModel::create([
+                'level_id' => $request->level_id,
+                'username' => $request->username,
+                'name' => $request->name,
+                'password' => bcrypt($request->password),
+                'photo' => $photoName,
+            ]);
+
             return response()->json([
                 'status' => true,
                 'message' => 'Data user berhasil disimpan'
             ]);
         }
 
-        redirect('/');
+        return redirect('/');
     }
 
     public function edit_ajax(string $id)
@@ -248,42 +268,67 @@ class UserController extends Controller
 
     public function update_ajax(Request $request, $id)
     {
-        if ($request->ajax() || $request->wantsJson()) {
+        // if ($request->ajax() || $request->wantsJson()) {
+            
             $rules = [
                 'level_id' => 'required|integer',
                 'username' => 'required|max:20|unique:m_user,username,' . $id . ',user_id',
-                'name'     => 'required|max:100',
-                'password' => 'nullable|min:6|max:20'
+                'name'    => 'required|max:100',
+                'password' => 'nullable|min:5|max:20',
+                'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Tambahkan validasi file
             ];
-            // use Illuminate\Support\Facades\Validator;
+
+
             $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
                 return response()->json([
-                    'status'    => false,    // respon json, true: berhasil, false: gagal 
-                    'message' => 'Validasi gagal.',
-                    'msgField' => $validator->errors() // menunjukkan field mana yang error
+                    'status'    => false,
+                    'msgField' => $validator->errors()
                 ]);
             }
-            $check = UserModel::find($id);
-            if ($check) {
-                if (!$request->filled('password')) { // jika password tidak diisi, maka hapus dari request
-                    $request->request->remove('password');
-                }
 
-                $check->update($request->all());
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diupdate'
-                ]);
-            } else {
+            $user = UserModel::find($id);
+            if (!$user) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data tidak ditemukan'
                 ]);
             }
-        }
-        return redirect('/');
+
+            // Hapus field password kalau kosong
+            if (!$request->filled('password')) {
+                $request->request->remove('password');
+            } else {
+                // Enkripsi password jika ada
+                $request->merge([
+                    'password' => bcrypt($request->password)
+                ]);
+            }
+
+            $params = $request->all();
+
+            if ($request->hasFile('photo')) {
+                if ($user->photo && Storage::exists('public/uploads/photo/' . $user->photo)) {
+                    Storage::delete('public/uploads/photo/' . $user->photo);
+                }
+
+                $file = $request->file('photo');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/uploads/photo', $filename);
+                if(isset($params['photo'])) unset($params['photo']);
+                $params['photo'] = $filename;
+            }
+
+            if(isset($params['_token'])) unset($params['_token']);
+            if(isset($params['_method'])) unset($params['_method']);
+
+            UserModel::where('user_id', $id)->update($params);
+
+            return redirect('/user');
+
+        // }
+
     }
 
     public function confirm_ajax(string $id)

@@ -38,6 +38,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Foto</th>
                         <th>Username</th>
                         <th>Nama</th>
                         <th>Level Pengguna</th>
@@ -80,6 +81,20 @@
                         orderable: false,
                         searchable: false
                     }, // Kolom nomor urut
+
+                    {
+                        data: "photo",
+                        className: "text-center",
+                        orderable: false,
+                        searchable: false,
+                        render: function(data) {
+                            if (data) {
+                                return `<img src="/storage/uploads/photo/${data}" width="100" class="rounded-circle"/>`;
+
+                            }
+                            return `<span class="text-muted"></span>`;
+                        }
+                    },
 
                     {
                         data: "username",
