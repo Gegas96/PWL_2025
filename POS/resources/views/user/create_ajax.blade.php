@@ -1,4 +1,4 @@
-<form action="{{ url('/user/ajax') }}" method="POST" id="form-tambah">
+<form action="{{ url('/user/ajax') }}" method="POST" id="form-tambah"  enctype="multipart/form-data">
     @csrf
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -34,6 +34,11 @@
                     <input value="" type="password" name="password" id="password" class="form-control" required>
                     <small id="error-password" class="error-text form-text text-danger"></small>
                 </div>
+                <div class="form-group">
+                        <label>Foto Profil</label>
+                        <input type="file" name="photo" id="photo" class="form-control" accept="image/*">
+                        <small id="error-photo" class="error-text form-text text-danger"></small>
+                    </div>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
@@ -64,13 +69,20 @@
                     required: true,
                     minlength: 6,
                     maxlength: 20
-                }
+                },
+                photo: {
+                        required: false, // optional, bisa true kalau wajib
+                        extension: "jpg|jpeg|png",
+                        filesize: 2048000 // maksimal 2MB
+                    }
             },
             submitHandler: function(form) {
+                let data = new FormData(form);
+
                 $.ajax({
                     url: form.action,
                     type: form.method,
-                    data: $(form).serialize(),
+                    data: data,
                     success: function(response) {
                         if (response.status) {
                             $('#myModal').modal('hide');

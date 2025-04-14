@@ -5,8 +5,10 @@
         <div class="card-header">
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
-                <a class="btn btn-sm btn-primary mt-1" href="{{ url('kategori/create') }}">Tambah</a>
-                <button onclick="modalAction('{{ url('/kategori/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
+                <button onclick="modalAction('{{ url('/kategori/import') }}')" class="btn btn-info">Import Kategori</button>
+                <a href="{{ url('/kategori/export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>Export Kategori</a>
+                <a href="{{ url('/kategori/export_pdf') }}" class="btn btn-warning"><i class="fa fa-file-pdf"></i>Export Kategori</a>
+                <button onclick="modalAction('{{ url('/kategori/create_ajax') }}')" class="btn btn-success">Tambah Data</button>
             </div>
         </div>
         <div class="card-body">
@@ -28,26 +30,31 @@
             </table>
         </div>
     </div>
-    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data- backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true"></div>
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data- backdrop="static"
+        data-keyboard="false" data-width="75%" aria-hidden="true">
+    </div>
 @endsection
 @push('css')
 @endpush
 @push('js')
     <script>
-        function modalAction(url = ''){
-            $('#myModal').load(url,function(){
+        function modalAction(url = '') {
+            $('#myModal').load(url, function() {
                 $('#myModal').modal('show');
             });
         }
-        
+        var tableKategori;
         $(document).ready(function() {
-            var dataUser = $('#table_kategori').DataTable({
+            tableKategori = $('#table_kategori').DataTable({
                 processing: true,
                 serverSide: true, // Jika ingin menggunakan server-side processing
                 ajax: {
                     "url": "{{ url('kategori/list') }}",
                     "dataType": "json",
-                    "type": "GET"
+                    "type": "GET",
+                    "data": function(d) {
+                        d.level_id = $('#level_id').val();
+                    }
                 },
                 columns: [{
                         data: "DT_RowIndex",
