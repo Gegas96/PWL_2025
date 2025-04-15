@@ -91,7 +91,7 @@
     // Untuk mengirimkan token laravel CSRF pada setiap request ajax
     $.ajaxSetup({
       headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').atrr('content')
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       }
     });
   </script>
