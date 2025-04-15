@@ -1,7 +1,7 @@
 @extends('layouts.template')
 
 @section('content')
-    <div class="card">
+    <div class="card bg-dark">
         <div class="card-header">
             <h3 class="card-title">Daftar Stok Barang</h3>
             <div class="card-tools">
