@@ -1,9 +1,9 @@
 @empty($penjualan)
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
-        <div class="modal-content bg-dark">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Kesalahan</h5>
-                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger">
@@ -17,10 +17,10 @@
     <form action="{{ url('/penjualan/' . $penjualan->penjualan_id . '/update_ajax') }}" method="POST" id="form-edit">
         @csrf @method('PUT')
         <div id="modal-master" class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
+            <div class="modal-content bg-dark">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Data Penjualan</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
