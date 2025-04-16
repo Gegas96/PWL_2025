@@ -117,7 +117,7 @@ class PenjualanController extends Controller
             return response()->json(['status' => true, 'message' => 'Data penjualan berhasil disimpan']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => false, 'message' => 'Gagal menyimpan data']);
+            return response()->json(['status' => false, 'message' => 'Gagal menyimpan data', 'error' => $e->getMessage()]);
         }
     }
 
